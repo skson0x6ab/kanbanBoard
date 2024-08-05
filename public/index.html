@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JS CSS HTML Kanban Board</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="info-container">
+        <h1>Kanban Board</h1>
+      </div>
+      <form class="input-container">
+        <div class="fields">
+          <input id="title" placeholder="title..." />
+          <input id="description" placeholder="description..." />
+        </div>
+        <input type="submit" id="submit-button" />
+      </form>
+    </header>
+
+    <section class="column-container">
+      <div class="task-column" id="backlog">
+        <h3>✔ 주간 업무</h3>
+        <hr class="custom-hr" />
+        <div class="task-list"></div>
+      </div>
+
+      <div class="task-column" id="doing">
+        <h3>✔ 일일 업무</h3>
+        <hr class="custom-hr" />
+        <div class="task-list"></div>
+      </div>
+
+      <div class="task-column" id="done">
+        <h3>✔ 완료</h3>
+        <hr class="custom-hr" />
+        <div class="task-list"></div>
+      </div>
+
+      <div class="task-column" id="discard">
+        <h3>✔ Won't Do</h3>
+        <hr class="custom-hr" />
+        <div class="task-list"></div>
+      </div>
+    </section>
+
+    <div class="error-container"></div>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
