@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const { v4: uuidv4 } = require('uuid'); // uuid 패키지 불러오기
 
 const app = express();
 const port = 8082;
@@ -43,7 +44,7 @@ app.post('/tasks', (req, res) => {
       tasksArray = JSON.parse(data);
     }
 
-    const newId = tasksArray.length;
+    const newId = uuidv4();
     const newTask = { id: newId, title, description, position }; // position 추가
     tasksArray.push(newTask);
 
@@ -56,10 +57,35 @@ app.post('/tasks', (req, res) => {
   });
 });
 
+app.delete('/tasks/:id', (req, res) => {
+  const taskId = parseInt(req.params.id);
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Error reading file');
+    }
+
+    let tasksArray = data ? JSON.parse(data) : [];
+    const taskIndex = tasksArray.findIndex(task => task.id === taskId);
+
+    if (taskIndex > -1) {
+      tasksArray.splice(taskIndex, 1); // 작업 삭제
+      fs.writeFile(filePath, JSON.stringify(tasksArray, null, 2), (err) => {
+        if (err) {
+          return res.status(500).send('Error writing file');
+        }
+        res.status(204).send(); // 204 No Content
+      });
+    } else {
+      res.status(404).send('Task not found');
+    }
+  });
+});
+
 // 작업 위치 업데이트
 app.patch('/tasks/:id', (req, res) => {
-  const taskId = parseInt(req.params.id);
-  const { position } = req.body;
+  const taskId = req.params.id; // UUID를 그대로 사용
+  const { position } = req.body; // 클라이언트로부터 받은 position
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {

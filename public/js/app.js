@@ -99,23 +99,32 @@ function dragOver(e) {
 }
 
 async function dragDrop() {
-  const columnId = this.parentNode.id; // 드롭된 위치의 ID를 가져옴
-  this.append(elementBeingDragged); // 드래그된 요소를 드롭된 위치에 추가
-
+  const columnId = this.parentElement.id; // 드롭된 위치의 ID를 가져옴
+  this.appendChild(elementBeingDragged); // 드래그된 요소를 드롭된 위치에 추가
+  console.log('this', this);
+  console.log('columnid:', this.id);
   // 위치 정보 업데이트
-  const taskId = elementBeingDragged.getAttribute('task-id');
-  const taskIndex = tasks.findIndex(task => task.id == taskId);
-  if (taskIndex > -1) {
-    tasks[taskIndex].position = columnId; // 새로운 위치 저장
+  const taskId = elementBeingDragged.getAttribute('task-id'); // 드래그된 작업의 ID를 가져옴
+  const taskIndex = tasks.findIndex(task => task.id === taskId);
 
+  if (taskIndex > -1) {
+    // 새로운 위치를 업데이트
+    tasks[taskIndex].position = columnId; // 새로운 위치 저장
+    console.log('Updated tasks array:', tasks);
     // JSON 파일에 위치 정보 업데이트 요청
-    await fetch(`/tasks/${taskId}`, {
+    const response = await fetch(`/tasks/${taskId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ position: columnId }),
     });
+
+    if (response.ok) {
+      console.log('Position updated on server');
+    } else {
+      console.error('Error updating position on server:', response.status);
+    }
   }
 }
 
@@ -125,12 +134,26 @@ taskLists.forEach((taskList) => {
   taskList.addEventListener('drop', dragDrop);
 });
 
-// 삭제 기능
-function deleteTask() {
+// 작업 삭제 
+async function deleteTask() {
   const headerTitle = this.parentNode.firstChild.textContent;
+  const taskToDelete = tasks.find((task) => task.title === headerTitle);
 
-  tasks = tasks.filter((task) => task.title !== headerTitle);
-  this.parentNode.parentNode.remove();
+  if (!taskToDelete) {
+    showError('Task not found');
+    return;
+  }
+
+  const response = await fetch(`/tasks/${taskToDelete.id}`, {
+    method: 'DELETE',
+  });
+
+  if (response.ok) {
+    tasks = tasks.filter((task) => task.id !== taskToDelete.id);
+    this.parentNode.parentNode.remove();
+  } else {
+    showError('Error deleting task');
+  }
 }
 
 // 오류 표시
